@@ -16,17 +16,20 @@ Vagrant.configure("2") do |config|
     sudo apt upgrade -y
     sudo apt install apache2 -y
     sudo apt install mysql-server -y
+    sudo mysql -e "CREATE USER 'yourapp'@'localhost' IDENTIFIED WITH mysql_native_password BY 'admin'";
+    sudo mysql -e "GRANT ALL PRIVILEGES ON *.* TO 'yourapp'@'localhost' WITH GRANT OPTION";
+    sudo mysql -e "FLUSH PRIVILEGES";
     sudo apt install php libapache2-mod-php php-mysql php-curl php-imagick php-mbstring php-dom php-zip php-bcmath php-intl npm php-cli unzip -y
+    curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+    chmod +x wp-cli.phar
+    sudo mv wp-cli.phar /usr/local/bin/wp
     sudo a2enmod rewrite
-    cd ~
-    curl -sS https://getcomposer.org/installer -o /tmp/composer-setup.php
-    HASH=`curl -sS https://composer.github.io/installer.sig`
-    php -r "if (hash_file('SHA384', '/tmp/composer-setup.php') === '$HASH') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
-    sudo php /tmp/composer-setup.php --install-dir=/usr/local/bin --filename=composer
     cd /var/www/html
-    wget https://wordpress.org/latest.zip
-    unzip latest.zip
-    rm latest.zip
+    sudo wp core download --allow-root
+    sudo wp config create --dbname=yourapp --dbuser=yourapp --dbpass=admin --allow-root
+    sudo wp db create --allow-root
+    sudo mv 000-default.conf /etc/apache2/sites-available/000-default.conf
     rm index.html
+    sudo systemctl restart apache2
   SHELL
 end

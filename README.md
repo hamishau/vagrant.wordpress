@@ -1,10 +1,12 @@
 # Introduction
-This is a guide to setup a new installation of WordPress, running in an Ubuntu 22.04 Vagrant Box, on an Ubuntu 22.04 Host machine. There are probably better alternatives but for me personally this is the easiest and cleanest way to get up and running locally with WordPress.
+This is a guide to setup a new installation of WordPress + WP-CLI, running in an Ubuntu 22.04 Vagrant Box. Install Vagrant and Virtualbox before proceeding.
 
 ## Clone Repository
 
-Clone Github repository to your local development machine:  
-`git clone git@github.com:hamishcomau/vagrant-wordpress.git`
+Clone Github repository to your local development machine:
+```
+git clone git@github.com:hamishau/vagrant.wordpress.git
+```
 
 ## Project Name
 
@@ -12,109 +14,74 @@ Search for all instances of `yourapp` and replace with your preferred project na
 
 ## Deploy Vagrant Box
 
-This requires both Virtualbox and Vagrant to be installed on your local machine:
-
-* https://www.virtualbox.org/wiki/Downloads
-* https://www.vagrantup.com/downloads.html
-
-Once installed, we can simply run the Vagrant up command to setup the virtual machine and run the automated deployment script:
-
-* `vagrant up`
-
-Edit your local hosts file (not the hosts file on the Vagrant virtual machine) and add the following line:
-
-* `192.168.56.10 yourapp.local`
-
-The deployment process may take a bit of time to download the Vagrant box and step through the shell commands, once complete we can access the virtual machine:
-
-* `vagrant ssh`
-
-## MySQL Configuration
-
-Create MySQL User and Database:
-
-* `sudo mysql`
-* `CREATE DATABASE yourapp;`
-* `CREATE USER 'yourapp'@'%' IDENTIFIED BY '6b$uFrdR79FGkxY^';`
-* `GRANT ALL PRIVILEGES ON yourapp.* TO 'yourapp'@'%';`
-* `exit`
-
-## Apache2 Configuration
-
-Generate private root key and certificate:
-
-* `openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout yourapp.key -out yourapp.crt`
-
-Enable SSL Apache2 module:
-
-* `sudo a2enmod ssl`
-
-Restart Apache2:
-
-* `sudo systemctl restart apache2`
-
-Update Virtual Host File by replacing the contents with the block below:
-
-* `sudo nano /etc/apache2/sites-available/000-default.conf`
-
 ```
-<VirtualHost *:443>
-    ServerAdmin webmaster@localhost
-    ServerName yourapp.local
-    DocumentRoot /var/www/html/wordpress
-    SSLEngine on
-    SSLCertificateFile /home/vagrant/yourapp.crt
-    SSLCertificateKeyFile /home/vagrant/yourapp.key
-    ErrorLog ${APACHE_LOG_DIR}/error.log
-    CustomLog ${APACHE_LOG_DIR}/access.log combined
-    <Directory "/var/www/html/wordpress">
-        allow from all
-        Options -Indexes
-        AllowOverride All
-    </Directory>
-</VirtualHost>
-
-<VirtualHost *:80>
-    ServerName yourapp.local
-    Redirect / https://yourapp.local/
-</VirtualHost>
+vagrant up
 ```
 
-Restart Apache2:
+## Edit Hosts
 
-* `sudo systemctl restart apache2`
+Windows Powershell: `notepad c:\Windows\System32\Drivers\etc\hosts`  
+Ubuntu Terminal: `sudo nano /etc/hosts`
 
-## Install WordPress
+```
+192.168.56.10 yourapp.local
+```
 
-Visit the development URL in your browser, which will automatically redirect you to the WordPress install process:
+## Setup WordPress:
 
-* `https://yourapp.local`
+```
+http://yourapp.local:8080
+```
 
-Database Name:  `yourapp`  
-Username: `yourapp`  
-Password: `6b$uFrdR79FGkxY^`  
-Database Host: `localhost`  
-Table Prefix: `wp_`
+---
 
-## Post Installation
+### Post Installation
+These are not required as a part of the Vagrant deployment process - just a collection of helpful commands that might be required at some point in your Vagrant box.
 
-These are not requirements, just helpful tools that might be needed such as importing a database or fixing up file/folder permissions.
+#### Update WP-CLI
+```
+vagrant ssh -c 'sudo wp cli update'
+```
 
-Set all directories to 755 and files to 644, and set ownership to www-data:
+#### Set Directory Permissions to 755:
 
-* `cd /var/www/html/wordpress`
-* `find ./html -type d -exec chmod 0755 {} \;`
-* `find ./html -type f -exec chmod 0644 {} \;`
-* `sudo chown -R www-data:www-data ./wordpress`
+```
+vagrant ssh -c 'cd /var/www && find ./html -type d -exec chmod 0755 {} \;'
+```
 
-Export MySQL database in Vagrant box:
+#### Set File Permissions to 644:
 
-* `sudo -s`
-* `cd /var/www/html`
-* `mysqldump yourapp > yourapp.sql`
+```
+vagrant ssh -c 'cd /var/www && find ./html -type f -exec chmod 0644 {} \;'
+```
 
-Import MySQL database dump:
+ #### Fix File and Folder Ownership:
 
-* `sudo -s`
-* `cd /var/www/html`
-* `mysql yourapp < yourapp.sql`
+```
+vagrant ssh -c 'cd /var/www && sudo chown -R www-data:www-data ./html'
+```
+
+#### Export MySQL Database
+```
+vagrant ssh -c 'cd /var/www/html && sudo wp db export yourapp.sql --allow-root'
+```
+
+#### Import MySQL Database
+```
+vagrant ssh -c 'cd /var/www/html && sudo wp db import yourapp.sql --allow-root'
+```
+
+#### Reset WordPress Database
+```
+vagrant ssh -c 'cd /var/www/html && wp db reset --yes'
+```
+
+#### Restart Vagrant Box
+```
+vagrant reload
+```
+
+#### Destroy Vagrant Box
+```
+vagrant destroy
+```
