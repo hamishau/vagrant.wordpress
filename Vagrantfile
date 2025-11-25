@@ -42,7 +42,7 @@ Vagrant.configure("2") do |config|
     sudo wp core download --allow-root
     sudo wp config create --dbname=yourapp --dbuser=yourapp --dbpass=admin --allow-root
     sudo wp db create --allow-root
-    sudo cp 000-default.conf /etc/apache2/sites-available/000-default.conf
+    sudo mv 000-default.conf /etc/apache2/sites-available/000-default.conf
     sudo rm -f index.html
     sudo systemctl reload apache2
   SHELL
