@@ -1,5 +1,5 @@
 # Introduction
-This is a guide to setup a new installation of WordPress + WP-CLI, running in an Ubuntu 24.04 Vagrant Box. Install Vagrant and Virtualbox before proceeding.
+This is a guide to setup a new installation of WordPress + WP-CLI, running in an Ubuntu 24.04 Vagrant Box. The base box is `bento/ubuntu-24.04`. Install Vagrant and Virtualbox before proceeding.
 
 ## Clone Repository
 
