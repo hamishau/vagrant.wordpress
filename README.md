@@ -1,5 +1,5 @@
 # Introduction
-This is a guide to setup a new installation of WordPress + WP-CLI, running in an Ubuntu 22.04 Vagrant Box. Install Vagrant and Virtualbox before proceeding.
+This is a guide to setup a new installation of WordPress + WP-CLI, running in an Ubuntu 24.04 Vagrant Box. The base box is `bento/ubuntu-24.04`. Install Vagrant and Virtualbox before proceeding.
 
 ## Clone Repository
 
@@ -20,7 +20,7 @@ vagrant up
 
 ## Edit Hosts
 
-Windows Powershell: `notepad c:\Windows\System32\Drivers\etc\hosts`  
+Windows Powershell: `notepad c:\Windows\System32\Drivers\etc\hosts`
 Ubuntu Terminal: `sudo nano /etc/hosts`
 
 ```
@@ -55,7 +55,7 @@ vagrant ssh -c 'cd /var/www && find ./html -type d -exec chmod 0755 {} \;'
 vagrant ssh -c 'cd /var/www && find ./html -type f -exec chmod 0644 {} \;'
 ```
 
- #### Fix File and Folder Ownership:
+#### Fix File and Folder Ownership:
 
 ```
 vagrant ssh -c 'cd /var/www && sudo chown -R www-data:www-data ./html'
